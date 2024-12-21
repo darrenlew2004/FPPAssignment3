@@ -6,6 +6,8 @@ import Control.Monad (foldM, (>=>))
 import System.IO (hFlush, stdout)
 import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
+import Data.Monoid (Monoid(..))
+import Data.Semigroup (Semigroup(..)) -- For GHC 8.4+ compatibility
 
 -- Define Game State
 data Game a = Game {
@@ -22,6 +24,38 @@ instance Functor Game where
     fmap f game = game {
         board = (fmap . fmap) f (board game)
     }
+
+-- Define Semigroup instance for Game
+instance Semigroup (Game Int) where
+    (<>) g1 g2 = Game {
+        board = solvedBoard (size g1), -- Reset to solved board size
+        emptyPos = (size g1 - 1, size g1 - 1), -- Set empty tile to bottom-right
+        size = size g1, -- Assume sizes are equal
+        moves = moves g1 + moves g2, -- Sum moves
+        moveHistory = moveHistory g1 ++ moveHistory g2, -- Combine histories
+        startTime = startTime g1 -- Keep the original start time
+    }
+      where
+        solvedBoard n = chunks n ([1 .. n * n - 1] ++ [0])
+        chunks _ [] = []
+        chunks m xs = take m xs : chunks m (drop m xs)
+
+-- Define Monoid instance for Game
+instance Monoid (Game Int) where
+    mempty = Game {
+        board = solvedBoard 3, -- Default to a 3x3 solved board
+        emptyPos = (2, 2), -- Default empty tile position
+        size = 3,
+        moves = 0,
+        moveHistory = [],
+        startTime = Nothing -- No start time
+    }
+      where
+        solvedBoard n = chunks n ([1 .. n * n - 1] ++ [0])
+        chunks _ [] = []
+        chunks m xs = take m xs : chunks m (drop m xs)
+
+    mappend = (<>)
 
 -- Initialize Game Board with Solvable Puzzle
 initBoard :: Int -> IO (Game Int)
@@ -194,8 +228,4 @@ mainMenu = do
         "1" -> initBoard 3 >>= gameLoop
         "2" -> initBoard 4 >>= gameLoop
         "3" -> initBoard 5 >>= gameLoop
-        "4" -> putStrLn "Goodbye!"
-        _   -> putStrLn "Invalid choice!" >> mainMenu
-
-main :: IO ()
-main = mainMenu
+        "4" -> putStrLn "Thank you for trying out the game!"
