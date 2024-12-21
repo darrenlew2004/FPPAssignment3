@@ -47,7 +47,7 @@ findEmpty :: [[Int]] -> (Int, Int)
 findEmpty brd = head [(i, j) | (i, row) <- zip [0..] brd, (j, v) <- zip [0..] row, v == 0]
 
 -- Check if the game is won
-isWon :: Game -> Bool
+isWon :: Game Int -> Bool
 isWon game = board game == solvedBoard (size game)
   where
     solvedBoard n = chunks n ([1..n*n-1] ++ [0])
@@ -55,7 +55,7 @@ isWon game = board game == solvedBoard (size game)
     chunks m xs = take m xs : chunks m (drop m xs)
 
 -- Display success message with score
-printSuccess :: Game -> IO ()
+printSuccess :: Game Int -> IO ()
 printSuccess game = do
     endTime <- getCurrentTime
     let elapsedTime = realToFrac $ diffUTCTime endTime (fromJust $ startTime game) :: Double
@@ -75,7 +75,7 @@ calculateScore :: Int -> Double -> Int -> Int
 calculateScore moves time size = round $ 10000 / (fromIntegral moves * time * fromIntegral size)
 
 -- Valid moves based on the empty tile position
-validMoves :: Game -> [(Int, Int)]
+validMoves :: Game Int -> [(Int, Int)]
 validMoves game = filter isValid [(x+dx, y+dy) | (dx, dy) <- directions]
   where
     (x, y) = emptyPos game
@@ -83,7 +83,7 @@ validMoves game = filter isValid [(x+dx, y+dy) | (dx, dy) <- directions]
     isValid (x', y') = x' >= 0 && x' < size game && y' >= 0 && y' < size game
 
 -- Make a move and update the game state
-makeMove :: Game -> (Int, Int) -> Maybe Game
+makeMove :: Game Int -> (Int, Int) -> Maybe (Game Int)
 makeMove game pos@(newX, newY)
     | pos `elem` validMoves game = Just game {
         board = newBoard,
@@ -101,7 +101,7 @@ makeMove game pos@(newX, newY)
                | i <- [0..size game-1]]
 
 -- Undo the last move
-undoMove :: Game -> Maybe Game
+undoMove :: Game Int -> Maybe (Game Int)
 undoMove game = case moveHistory game of
     [] -> Nothing
     ((prevX, prevY):rest) -> 
@@ -141,7 +141,7 @@ swapTiles brd (x1, y1) (x2, y2) = [[swap i j | j <- [0..length row - 1]] | (i, r
         | otherwise = brd !! i !! j
 
 -- Print the current board
-printBoard :: Game -> IO ()
+printBoard :: Game Int -> IO ()
 printBoard game = do
     putStrLn ("\nMoves: " ++ show (moves game))
     putStrLn (replicate (size game * 4 + 1) '-')
@@ -152,7 +152,7 @@ printBoard game = do
     showCell n = show n
 
 -- Game Loop
-gameLoop :: Game -> IO ()
+gameLoop :: Game Int -> IO ()
 gameLoop game = do
     printBoard game
     if isWon game then printSuccess game
