@@ -8,8 +8,8 @@ import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 
 -- Define Game State
-data Game = Game {
-    board :: [[Int]],
+data Game a = Game {
+    board :: [[a]],
     emptyPos :: (Int, Int),
     size :: Int,
     moves :: Int,
@@ -17,8 +17,14 @@ data Game = Game {
     startTime :: Maybe UTCTime
 } deriving (Show)
 
+-- Implement Functor instance for Game
+instance Functor Game where
+    fmap f game = game {
+        board = (fmap . fmap) f (board game)
+    }
+
 -- Initialize Game Board with Solvable Puzzle
-initBoard :: Int -> IO Game
+initBoard :: Int -> IO (Game Int)
 initBoard n = do
     let solved = chunks n ([1..n*n-1] ++ [0])
     shuffled <- shuffleBoard solved n
