@@ -228,4 +228,9 @@ mainMenu = do
         "1" -> initBoard 3 >>= gameLoop
         "2" -> initBoard 4 >>= gameLoop
         "3" -> initBoard 5 >>= gameLoop
-        "4" -> putStrLn "Thank you for trying out the game!"
+        "4" -> putStrLn "Goodbye!"
+        _   -> putStrLn "Invalid choice!" >> mainMenu
+
+-- Main function
+main :: IO ()
+main = mainMenu
