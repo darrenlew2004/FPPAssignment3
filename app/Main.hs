@@ -7,7 +7,7 @@ import System.IO (hFlush, stdout)
 import Data.Maybe (fromJust, isJust, mapMaybe)
 import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import Data.Monoid (Monoid(..))
-import Data.Semigroup (Semigroup(..)) -- For GHC 8.4+ compatibility
+import Data.Semigroup (Semigroup(..))
 
 -- Define the game state representation
 data Game a = Game {
