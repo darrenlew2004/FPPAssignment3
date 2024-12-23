@@ -9,7 +9,7 @@ import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..)) -- For GHC 8.4+ compatibility
 
--- Define Game State
+-- Define the game state representation
 data Game a = Game {
     board :: [[a]],
     emptyPos :: (Int, Int),
@@ -19,13 +19,13 @@ data Game a = Game {
     startTime :: Maybe UTCTime
 } deriving (Show)
 
--- Implement Functor instance for Game
+-- Implement Functor instance for Game to allow mapping over the board
 instance Functor Game where
     fmap f game = game {
         board = (fmap . fmap) f (board game)
     }
 
--- Define Semigroup instance for Game
+-- Define Semigroup instance to combine two game states
 instance Semigroup (Game Int) where
     (<>) g1 g2 = Game {
         board = solvedBoard (size g1), -- Reset to solved board size
@@ -40,7 +40,7 @@ instance Semigroup (Game Int) where
         chunks _ [] = []
         chunks m xs = take m xs : chunks m (drop m xs)
 
--- Define Monoid instance for Game
+-- Define Monoid instance for Game with default empty state
 instance Monoid (Game Int) where
     mempty = Game {
         board = solvedBoard 3, -- Default to a 3x3 solved board
@@ -57,7 +57,7 @@ instance Monoid (Game Int) where
 
     mappend = (<>)
 
--- Initialize Game Board with Solvable Puzzle
+-- Initialize the game board with solvable puzzle
 initBoard :: Int -> IO (Game Int)
 initBoard n = do
     let solved = chunks n ([1..n*n-1] ++ [0])
@@ -108,7 +108,7 @@ printSuccess game = do
 calculateScore :: Int -> Double -> Int -> Int
 calculateScore moves time size = round $ 10000 / (fromIntegral moves * time * fromIntegral size)
 
--- Valid moves based on the empty tile position
+-- Get valid moves based on the empty tile position
 validMoves :: Game Int -> [(Int, Int)]
 validMoves game = filter isValid [(x+dx, y+dy) | (dx, dy) <- directions]
   where
@@ -185,7 +185,7 @@ printBoard game = do
     showCell 0 = " "
     showCell n = show n
 
--- Game Loop
+-- Main game loop
 gameLoop :: Game Int -> IO ()
 gameLoop game = do
     printBoard game
@@ -231,6 +231,6 @@ mainMenu = do
         "4" -> putStrLn "Goodbye!"
         _   -> putStrLn "Invalid choice!" >> mainMenu
 
--- Main function
+-- Main function to start the program
 main :: IO ()
 main = mainMenu
