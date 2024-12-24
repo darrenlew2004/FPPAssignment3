@@ -9,6 +9,21 @@ import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime)
 import Data.Monoid (Monoid(..))
 import Data.Semigroup (Semigroup(..))
 
+-- Citation
+-- Code assisted by: ChatGPT
+-- Author: OpenAI
+-- Availability: https://chatgpt.com/?model=auto
+
+-- Citation
+-- Code assisted by: Copilot
+-- Author: Microsoft
+-- Availability: https://copilot.microsoft.com/onboarding
+
+-- Citation
+-- Code assisted by: Claude.ai
+-- Author: Claude
+-- Availablility: https://claude.ai/onboarding 
+
 -- Define the game state representation
 data Game a = Game {
     board :: [[a]],
