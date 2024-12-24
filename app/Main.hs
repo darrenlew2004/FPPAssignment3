@@ -28,12 +28,12 @@ instance Functor Game where
 -- Define Semigroup instance to combine two game states
 instance Semigroup (Game Int) where
     (<>) g1 g2 = Game {
-        board = solvedBoard (size g1), -- Reset to solved board size
-        emptyPos = (size g1 - 1, size g1 - 1), -- Set empty tile to bottom-right
-        size = size g1, -- Assume sizes are equal
-        moves = moves g1 + moves g2, -- Sum moves
-        moveHistory = moveHistory g1 ++ moveHistory g2, -- Combine histories
-        startTime = startTime g1 -- Keep the original start time
+        board = solvedBoard (size g1),
+        emptyPos = (size g1 - 1, size g1 - 1),
+        size = size g1,
+        moves = moves g1 + moves g2,
+        moveHistory = moveHistory g1 ++ moveHistory g2,
+        startTime = startTime g1
     }
       where
         solvedBoard n = chunks n ([1 .. n * n - 1] ++ [0])
@@ -43,12 +43,12 @@ instance Semigroup (Game Int) where
 -- Define Monoid instance for Game with default empty state
 instance Monoid (Game Int) where
     mempty = Game {
-        board = solvedBoard 3, -- Default to a 3x3 solved board
-        emptyPos = (2, 2), -- Default empty tile position
+        board = solvedBoard 3,
+        emptyPos = (2, 2),
         size = 3,
         moves = 0,
         moveHistory = [],
-        startTime = Nothing -- No start time
+        startTime = Nothing
     }
       where
         solvedBoard n = chunks n ([1 .. n * n - 1] ++ [0])
@@ -212,22 +212,44 @@ getNewPos (x, y) dir = case dir of
     'd' -> Just (x, y+1)
     _   -> Nothing
 
--- Main Menu
+-- "How It Works" Screen
+howItWorks :: IO ()
+howItWorks =
+    putStrLn "\n=== How It Works ===" >>
+    putStrLn "Objective:" >>
+    putStrLn "The goal is to arrange the numbers in ascending order with the empty tile at the bottom-right." >>
+    putStrLn "\nControls:" >>
+    putStrLn "  - Use 'w' to move the empty tile up" >>
+    putStrLn "  - Use 's' to move the empty tile down" >>
+    putStrLn "  - Use 'a' to move the empty tile left" >>
+    putStrLn "  - Use 'd' to move the empty tile right" >>
+    putStrLn "  - Use 'u' to undo the last move" >>
+    putStrLn "  - Use 'q' to quit the game" >>
+    putStrLn "\nGameplay Tips:" >>
+    putStrLn "  - Plan your moves to avoid unnecessary backtracking." >>
+    putStrLn "  - Try to solve row by row or column by column for easier management." >>
+    putStrLn "\nPress Enter to return to the main menu." >>
+    getLine >>
+    mainMenu
+
+-- Main Menu with "How It Works" Option
 mainMenu :: IO ()
 mainMenu =
     putStrLn "\n=== Number Sliding Puzzle ===" >>
     putStrLn "1. Start 3x3 Puzzle" >>
     putStrLn "2. Start 4x4 Puzzle" >>
     putStrLn "3. Start 5x5 Puzzle" >>
-    putStrLn "4. Quit" >>
-    putStr "Select option (1-4): " >>
+    putStrLn "4. How It Works" >>
+    putStrLn "5. Quit" >>
+    putStr "Select option (1-5): " >>
     hFlush stdout >>
     getLine >>= \choice ->
         case choice of
             "1" -> initBoard 3 >>= gameLoop
             "2" -> initBoard 4 >>= gameLoop
             "3" -> initBoard 5 >>= gameLoop
-            "4" -> putStrLn "Goodbye!"
+            "4" -> howItWorks
+            "5" -> putStrLn "Goodbye!"
             _    -> putStrLn "Invalid choice!" >> mainMenu
 
 -- Main function to start the program
